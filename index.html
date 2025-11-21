@@ -23,8 +23,25 @@ body {
     overflow-x: hidden;
 }
 
+/* ---------- SANTA FLYING ANIMATION ---------- */
+#santaFly {
+    position: fixed;
+    top: 20%;
+    left: -300px;
+    width: 250px;
+    z-index: 9999;
+    animation: flyAcross 5s ease-out forwards;
+}
+
+@keyframes flyAcross {
+    0%   { transform: translateX(-300px) translateY(0) scale(1); opacity: 1; }
+    40%  { transform: translateX(50vw) translateY(-20px) scale(1.05); }
+    80%  { transform: translateX(100vw) translateY(10px) scale(1); opacity: 1; }
+    100% { transform: translateX(120vw) translateY(30px); opacity: 0; }
+}
+
 /* Snow & lights */
-.snow-container, .twinkling-lights {
+.snow-container {
     position: fixed; top: 0; left: 0;
     width: 100%; height: 100%;
     pointer-events: none;
@@ -33,9 +50,8 @@ body {
 .snowflake {
     position: absolute;
     font-size: 1rem;
-    color: rgba(255,255,255,0.8);
+    color: rgba(255,255,255,0.9);
     animation: fall linear infinite;
-    text-shadow: 0 0 10px rgba(255,255,255,0.5);
 }
 @keyframes fall {
     0% { transform: translateY(-100vh); opacity: 1; }
@@ -105,7 +121,7 @@ body {
     transition: 0.3s ease;
 }
 .day-card:hover {
-    transform: translateY(-6px) scale(1.02);
+    transform: translateY(-6px) scale(1.03);
     border-color: rgba(255,215,0,0.6);
 }
 .gift-icon {
@@ -118,6 +134,18 @@ body {
     font-size: 1.8rem;
     font-family: 'Playfair Display', serif;
 }
+
+.activity-content {
+    margin-top: 1.2rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    display: none;
+}
+
+.revealed .activity-content {
+    display: block !important;
+}
+
 .reveal-button {
     text-align: center;
 }
@@ -128,28 +156,18 @@ body {
 }
 .click-hint {
     font-size: .9rem;
-    font-style: italic;
     opacity: .8;
-}
-.activity-content {
-    display: none;
-    margin-top: 1.2rem;
-    font-size: 1.1rem;
-    line-height: 1.5;
-}
-.revealed .activity-content {
-    display: block !important;
-}
-.revealed .gift-icon {
-    font-size: 3.2rem;
+    font-style: italic;
 }
 </style>
 </head>
 
 <body>
 
+<!-- Santa Fly Animation -->
+<img id="santaFly" src="https://raw.githubusercontent.com/encharm/Font-Awesome-SVG-PNG/master/black/svg/sleigh-solid.svg" />
+
 <div class="snow-container" id="snowContainer"></div>
-<div class="twinkling-lights" id="twinklingLights"></div>
 
 <main class="container">
 
@@ -173,19 +191,19 @@ body {
 </main>
 
 <script>
-/* Activities */
+/* -------- FIXED ACTIVITIES -------- */
 const activities = {
-    1: "📸 Day 1: The first team to take a photo with Christmas decorations or featuring 5 blue or glittery objects wins!",
+    1: "📸 Day 1: The Great Sparkle Scavenger Hunt — submit your proof of shine!",
     2: "😂 Day 2: Christmas Meme Generator Contest",
     3: "💝 Day 3: Gratitude Wall — write what you're grateful for this year",
     4: "🍷 Day 4: Hot wine meetup at 6 PM with the team",
     5: "📸 Day 5: Team takes a Christmas-card-vibe picture and sends it to the group.",
-    6: "🎵 Day 6: Share your favorite Christmas song in the group!",
+    6: "🎵 Day 6: Share your favorite Christmas song!",
     7: "🎬 Day 7: Post your favorite Christmas movie GIF!",
-    8: "💃 Day 8: Just Dance Challenge!",
-    9: "☕ Day 9: Hot Chocolate / Coffee Break Together (Christmas songs included!)",
-    10:"🎪 Day 10: Visit a Christmas Market together!",
-    11:"🎉 Day 11: Celebration Day!"
+    8: "💃 Day 8: Christmas Just Dance Challenge",
+    9: "☕ Day 9: Hot Chocolate / Coffee Break with Christmas songs",
+    10: "🎪 Day 10: Visit a Christmas Market together!",
+    11: "🎉 Day 11: Celebration Day!"
 };
 
 /* Snow */
@@ -203,39 +221,43 @@ function createSnowflakes() {
     }
 }
 
-/* Calendar builder */
+/* Calendar */
 function createCalendar() {
     const grid = document.getElementById("calendarGrid");
     grid.innerHTML = "";
 
-    Object.keys(activities).forEach(d => {
-        const day = parseInt(d);
+    Object.keys(activities).forEach(day => {
         const card = document.createElement("div");
         card.classList.add("day-card");
 
-        if (day === 11) {
-            card.innerHTML = `
-                <div class="gift-icon">🎉</div>
-                <div class="day-number">Dec ${day}</div>
-                <div class="activity-content" style="display:block;">${activities[d]}</div>
-            `;
-        } else {
-            card.innerHTML = `
-                <div class="gift-icon">🎁</div>
-                <div class="day-number">Dec ${day}</div>
-                <div class="reveal-button">
-                    <div class="mystery-text">🎄 Click to reveal today's activity 🎄</div>
-                    <div class="click-hint">Tap the gift ↑</div>
-                </div>
-                <div class="activity-content">${activities[d]}</div>
-            `;
-            card.addEventListener("click", () => {
-                card.classList.add("revealed");
-                card.querySelector(".reveal-button").style.display = "none";
-                card.querySelector(".activity-content").style.display = "block";
-                card.querySelector(".gift-icon").textContent = "🎉";
-            });
-        }
+        card.innerHTML = `
+            <div class="gift-icon">🎁</div>
+            <div class="day-number">Dec ${day}</div>
+            <div class="reveal-button">
+                <div class="mystery-text">🎄 Click to reveal today's activity 🎄</div>
+                <div class="click-hint">Tap the gift ↑</div>
+            </div>
+            <div class="activity-content">${activities[day]}</div>
+        `;
+
+        /* TOGGLE REVEAL */
+        card.addEventListener("click", () => {
+            card.classList.toggle("revealed");
+
+            const activity = card.querySelector(".activity-content");
+            const button = card.querySelector(".reveal-button");
+            const gift = card.querySelector(".gift-icon");
+
+            if (card.classList.contains("revealed")) {
+                activity.style.display = "block";
+                button.style.display = "none";
+                gift.textContent = "🎉";
+            } else {
+                activity.style.display = "none";
+                button.style.display = "block";
+                gift.textContent = "🎁";
+            }
+        });
 
         grid.appendChild(card);
     });
@@ -245,14 +267,18 @@ function createCalendar() {
 function countdown() {
     const now = new Date();
     const target = new Date(now.getFullYear(), 11, 11);
-    if (now > target) target.setFullYear(now.getFullYear()+1);
+    if (now > target) target.setFullYear(now.getFullYear() + 1);
 
     const diff = target - now;
 
-    document.getElementById("days").textContent = String(Math.floor(diff/(1000*60*60*24))).padStart(2,"0");
-    document.getElementById("hours").textContent = String(Math.floor(diff/(1000*60*60)%24)).padStart(2,"0");
-    document.getElementById("minutes").textContent = String(Math.floor(diff/(1000*60)%60)).padStart(2,"0");
-    document.getElementById("seconds").textContent = String(Math.floor(diff/1000%60)).padStart(2,"0");
+    document.getElementById("days").textContent =
+        String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, "0");
+    document.getElementById("hours").textContent =
+        String(Math.floor((diff / (1000 * 60 * 60)) % 24)).padStart(2, "0");
+    document.getElementById("minutes").textContent =
+        String(Math.floor((diff / (1000 * 60)) % 60)).padStart(2, "0");
+    document.getElementById("seconds").textContent =
+        String(Math.floor((diff / 1000) % 60)).padStart(2, "0");
 }
 
 /* Init */
