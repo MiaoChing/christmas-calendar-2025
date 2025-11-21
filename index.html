@@ -23,22 +23,6 @@ body {
     overflow-x: hidden;
 }
 
-/* ---------- SANTA FLYING ANIMATION ---------- */
-#santaFly {
-    position: fixed;
-    top: 20%;
-    left: -300px;
-    width: 250px;
-    z-index: 9999;
-    animation: flyAcross 5s ease-out forwards;
-}
-
-@keyframes flyAcross {
-    0%   { transform: translateX(-300px) translateY(0) scale(1); opacity: 1; }
-    40%  { transform: translateX(50vw) translateY(-20px) scale(1.05); }
-    80%  { transform: translateX(100vw) translateY(10px) scale(1); opacity: 1; }
-    100% { transform: translateX(120vw) translateY(30px); opacity: 0; }
-}
 
 /* Snow & lights */
 .snow-container {
@@ -163,9 +147,6 @@ body {
 </head>
 
 <body>
-
-<!-- Santa Fly Animation -->
-<img id="santaFly" src="https://raw.githubusercontent.com/encharm/Font-Awesome-SVG-PNG/master/black/svg/sleigh-solid.svg" />
 
 <div class="snow-container" id="snowContainer"></div>
 
