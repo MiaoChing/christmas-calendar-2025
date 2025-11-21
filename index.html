@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Christmas Countdown Calendar</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ---------- ELEGANT CHRISTMAS BACKGROUND ---------- */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(255, 220, 150, 0.25), transparent 70%),
+        radial-gradient(circle at 80% 70%, rgba(255, 200, 120, 0.20), transparent 60%),
+        radial-gradient(circle at 10% 90%, rgba(255, 255, 255, 0.10), transparent 60%),
+        linear-gradient(165deg, #7a001d 0%, #8b0000 25%, #5a0a0a 55%, #1f0000 100%);
+    min-height: 100vh;
+    color: #f8fafc;
+    overflow-x: hidden;
+}
+
+/* Snow & lights */
+.snow-container, .twinkling-lights {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+.snowflake {
+    position: absolute;
+    font-size: 1rem;
+    color: rgba(255,255,255,0.8);
+    animation: fall linear infinite;
+    text-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+@keyframes fall {
+    0% { transform: translateY(-100vh); opacity: 1; }
+    100% { transform: translateY(100vh); opacity: 0; }
+}
+
+/* ---------- MAIN STRUCTURE ---------- */
+.container {
+    position: relative;
+    z-index: 10;
+    max-width: 1100px;
+    margin: auto;
+    padding: 3rem 2rem;
+}
+.header {
+    text-align: center;
+}
+.main-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.8rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #ffd700, #fff, #ffd700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Countdown */
+.countdown-section {
+    background: rgba(255,255,255,0.08);
+    padding: 2rem;
+    border-radius: 25px;
+    text-align: center;
+    margin-bottom: 3rem;
+    border: 1px solid rgba(255,215,0,0.4);
+    backdrop-filter: blur(10px);
+}
+.countdown-timer {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+}
+.time-unit {
+    padding: 1rem;
+    background: rgba(255,255,255,0.12);
+    border-radius: 12px;
+    border: 1px solid rgba(255,215,0,0.3);
+}
+.time-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+}
+
+/* Calendar grid */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+    gap: 2rem;
+}
+.day-card {
+    padding: 2.5rem 2rem;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 25px;
+    backdrop-filter: blur(10px);
+    position: relative;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+.day-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    border-color: rgba(255,215,0,0.6);
+}
+.gift-icon {
+    font-size: 3rem;
+    text-align: center;
+}
+.day-number {
+    text-align: center;
+    margin: 1rem 0;
+    font-size: 1.8rem;
+    font-family: 'Playfair Display', serif;
+}
+.reveal-button {
+    text-align: center;
+}
+.mystery-text {
+    font-size: 1.1rem;
+    color: #ffd700;
+    font-weight: 600;
+}
+.click-hint {
+    font-size: .9rem;
+    font-style: italic;
+    opacity: .8;
+}
+.activity-content {
+    display: none;
+    margin-top: 1.2rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
+}
+.revealed .activity-content {
+    display: block !important;
+}
+.revealed .gift-icon {
+    font-size: 3.2rem;
+}
+</style>
+</head>
+
+<body>
+
+<div class="snow-container" id="snowContainer"></div>
+<div class="twinkling-lights" id="twinklingLights"></div>
+
+<main class="container">
+
+<header class="header">
+    <h1 class="main-title">Christmas Countdown Calendar</h1>
+    <p>Click each gift to reveal the activity!</p>
+</header>
+
+<section class="countdown-section">
+    <h2>Countdown to December 11th</h2>
+    <div class="countdown-timer">
+        <div class="time-unit"><span id="days" class="time-number">00</span><div>Days</div></div>
+        <div class="time-unit"><span id="hours" class="time-number">00</span><div>Hours</div></div>
+        <div class="time-unit"><span id="minutes" class="time-number">00</span><div>Minutes</div></div>
+        <div class="time-unit"><span id="seconds" class="time-number">00</span><div>Seconds</div></div>
+    </div>
+</section>
+
+<section class="calendar-grid" id="calendarGrid"></section>
+
+</main>
+
+<script>
+/* Activities */
+const activities = {
+    1: "📸 Day 1: The first team to take a photo with Christmas decorations or featuring 5 blue or glittery objects wins!",
+    2: "😂 Day 2: Christmas Meme Generator Contest",
+    3: "💝 Day 3: Gratitude Wall — write what you're grateful for this year",
+    4: "🍷 Day 4: Hot wine meetup at 6 PM with the team",
+    5: "📸 Day 5: Team takes a Christmas-card-vibe picture and sends it to the group.",
+    6: "🎵 Day 6: Share your favorite Christmas song in the group!",
+    7: "🎬 Day 7: Post your favorite Christmas movie GIF!",
+    8: "💃 Day 8: Just Dance Challenge!",
+    9: "☕ Day 9: Hot Chocolate / Coffee Break Together (Christmas songs included!)",
+    10:"🎪 Day 10: Visit a Christmas Market together!",
+    11:"🎉 Day 11: Celebration Day!"
+};
+
+/* Snow */
+function createSnowflakes() {
+    const c = document.getElementById("snowContainer");
+    const icons = ["❄","❅","❆","✨"];
+    for (let i = 0; i < 60; i++) {
+        let s = document.createElement("div");
+        s.className = "snowflake";
+        s.textContent = icons[Math.floor(Math.random()*icons.length)];
+        s.style.left = Math.random()*100+"%";
+        s.style.animationDuration = (3 + Math.random()*4)+"s";
+        s.style.animationDelay = Math.random()*2+"s";
+        c.appendChild(s);
+    }
+}
+
+/* Calendar builder */
+function createCalendar() {
+    const grid = document.getElementById("calendarGrid");
+    grid.innerHTML = "";
+
+    Object.keys(activities).forEach(d => {
+        const day = parseInt(d);
+        const card = document.createElement("div");
+        card.classList.add("day-card");
+
+        if (day === 11) {
+            card.innerHTML = `
+                <div class="gift-icon">🎉</div>
+                <div class="day-number">Dec ${day}</div>
+                <div class="activity-content" style="display:block;">${activities[d]}</div>
+            `;
+        } else {
+            card.innerHTML = `
+                <div class="gift-icon">🎁</div>
+                <div class="day-number">Dec ${day}</div>
+                <div class="reveal-button">
+                    <div class="mystery-text">🎄 Click to reveal today's activity 🎄</div>
+                    <div class="click-hint">Tap the gift ↑</div>
+                </div>
+                <div class="activity-content">${activities[d]}</div>
+            `;
+            card.addEventListener("click", () => {
+                card.classList.add("revealed");
+                card.querySelector(".reveal-button").style.display = "none";
+                card.querySelector(".activity-content").style.display = "block";
+                card.querySelector(".gift-icon").textContent = "🎉";
+            });
+        }
+
+        grid.appendChild(card);
+    });
+}
+
+/* Countdown */
+function countdown() {
+    const now = new Date();
+    const target = new Date(now.getFullYear(), 11, 11);
+    if (now > target) target.setFullYear(now.getFullYear()+1);
+
+    const diff = target - now;
+
+    document.getElementById("days").textContent = String(Math.floor(diff/(1000*60*60*24))).padStart(2,"0");
+    document.getElementById("hours").textContent = String(Math.floor(diff/(1000*60*60)%24)).padStart(2,"0");
+    document.getElementById("minutes").textContent = String(Math.floor(diff/(1000*60)%60)).padStart(2,"0");
+    document.getElementById("seconds").textContent = String(Math.floor(diff/1000%60)).padStart(2,"0");
+}
+
+/* Init */
+document.addEventListener("DOMContentLoaded", () => {
+    createSnowflakes();
+    createCalendar();
+    countdown();
+    setInterval(countdown, 1000);
+});
+</script>
+
+</body>
+</html>
